@@ -170,9 +170,9 @@ extension Pricing {
         /// The pagination token that indicates the next set of results that you want to retrieve.
         public let nextToken: String?
         /// The code for the service whose products you want to retrieve.
-        public let serviceCode: String?
+        public let serviceCode: String
 
-        public init(filters: [Filter]? = nil, formatVersion: String? = nil, maxResults: Int? = nil, nextToken: String? = nil, serviceCode: String? = nil) {
+        public init(filters: [Filter]? = nil, formatVersion: String? = nil, maxResults: Int? = nil, nextToken: String? = nil, serviceCode: String) {
             self.filters = filters
             self.formatVersion = formatVersion
             self.maxResults = maxResults
@@ -219,9 +219,9 @@ extension Pricing {
         /// The attributes that are available for this service.
         public let attributeNames: [String]?
         /// The code for the Amazon Web Services service.
-        public let serviceCode: String?
+        public let serviceCode: String
 
-        public init(attributeNames: [String]? = nil, serviceCode: String? = nil) {
+        public init(attributeNames: [String]? = nil, serviceCode: String) {
             self.attributeNames = attributeNames
             self.serviceCode = serviceCode
         }

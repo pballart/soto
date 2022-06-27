@@ -1715,6 +1715,15 @@ extension SageMaker {
         public var description: String { return self.rawValue }
     }
 
+    public enum WorkforceStatus: String, CustomStringConvertible, Codable, _SotoSendable {
+        case active = "Active"
+        case deleting = "Deleting"
+        case failed = "Failed"
+        case initializing = "Initializing"
+        case updating = "Updating"
+        public var description: String { return self.rawValue }
+    }
+
     public enum TrialComponentParameterValue: AWSEncodableShape & AWSDecodableShape, _SotoSendable {
         /// The numeric value of a numeric hyperparameter. If you specify a value for this parameter, you can't specify the StringValue parameter.
         case numberValue(Double)
@@ -2757,7 +2766,7 @@ extension SageMaker {
     }
 
     public struct AutoMLDataSource: AWSEncodableShape & AWSDecodableShape {
-        /// The Amazon S3 location of the input data.  The input data must be in CSV format and contain at least 500 rows.
+        /// The Amazon S3 location of the input data.
         public let s3DataSource: AutoMLS3DataSource
 
         public init(s3DataSource: AutoMLS3DataSource) {
@@ -2963,7 +2972,7 @@ extension SageMaker {
     }
 
     public struct AutoMLS3DataSource: AWSEncodableShape & AWSDecodableShape {
-        /// The data type.
+        /// The data type. A ManifestFile should have the format shown below:  [ {"prefix": "s3://DOC-EXAMPLE-BUCKET/DOC-EXAMPLE-FOLDER/DOC-EXAMPLE-PREFIX/"},    "DOC-EXAMPLE-RELATIVE-PATH/DOC-EXAMPLE-FOLDER/DATA-1",   "DOC-EXAMPLE-RELATIVE-PATH/DOC-EXAMPLE-FOLDER/DATA-2",   ... "DOC-EXAMPLE-RELATIVE-PATH/DOC-EXAMPLE-FOLDER/DATA-N" ]  An S3Prefix should have the following format:   s3://DOC-EXAMPLE-BUCKET/DOC-EXAMPLE-FOLDER-OR-FILE
         public let s3DataType: AutoMLS3DataType
         /// The URL to the Amazon S3 data source.
         public let s3Uri: String
@@ -4112,7 +4121,7 @@ extension SageMaker {
         public let appType: AppType
         /// The domain ID.
         public let domainId: String
-        /// The instance type and the Amazon Resource Name (ARN) of the SageMaker image created on the instance.
+        /// The instance type and the Amazon Resource Name (ARN) of the SageMaker image created on the instance.  The value of InstanceType passed as part of the ResourceSpec in the CreateApp call overrides the value passed as part of the ResourceSpec configured for the user profile or the domain. If InstanceType is not specified in any of those three ResourceSpec values for a KernelGateway app, the CreateApp call fails with a request validation error.
         public let resourceSpec: ResourceSpec?
         /// Each tag consists of a key and an optional value. Tag keys must be unique per resource.
         public let tags: [Tag]?
@@ -7038,13 +7047,16 @@ extension SageMaker {
         public let tags: [Tag]?
         /// The name of the private workforce.
         public let workforceName: String
+        /// Use this parameter to configure a workforce using VPC.
+        public let workforceVpcConfig: WorkforceVpcConfigRequest?
 
-        public init(cognitoConfig: CognitoConfig? = nil, oidcConfig: OidcConfig? = nil, sourceIpConfig: SourceIpConfig? = nil, tags: [Tag]? = nil, workforceName: String) {
+        public init(cognitoConfig: CognitoConfig? = nil, oidcConfig: OidcConfig? = nil, sourceIpConfig: SourceIpConfig? = nil, tags: [Tag]? = nil, workforceName: String, workforceVpcConfig: WorkforceVpcConfigRequest? = nil) {
             self.cognitoConfig = cognitoConfig
             self.oidcConfig = oidcConfig
             self.sourceIpConfig = sourceIpConfig
             self.tags = tags
             self.workforceName = workforceName
+            self.workforceVpcConfig = workforceVpcConfig
         }
 
         public func validate(name: String) throws {
@@ -7058,6 +7070,7 @@ extension SageMaker {
             try self.validate(self.workforceName, name: "workforceName", parent: name, max: 63)
             try self.validate(self.workforceName, name: "workforceName", parent: name, min: 1)
             try self.validate(self.workforceName, name: "workforceName", parent: name, pattern: "^[a-zA-Z0-9]([a-zA-Z0-9\\-]){0,62}$")
+            try self.workforceVpcConfig?.validate(name: "\(name).workforceVpcConfig")
         }
 
         private enum CodingKeys: String, CodingKey {
@@ -7066,6 +7079,7 @@ extension SageMaker {
             case sourceIpConfig = "SourceIpConfig"
             case tags = "Tags"
             case workforceName = "WorkforceName"
+            case workforceVpcConfig = "WorkforceVpcConfig"
         }
     }
 
@@ -15146,18 +15160,22 @@ extension SageMaker {
     public struct LabelingJobResourceConfig: AWSEncodableShape & AWSDecodableShape {
         /// The Amazon Web Services Key Management Service (Amazon Web Services KMS) key that Amazon SageMaker uses to encrypt data on the storage volume attached to the ML compute instance(s) that run the training and inference jobs used for automated data labeling.  You can only specify a VolumeKmsKeyId when you create a labeling job with automated data labeling enabled using the API operation CreateLabelingJob. You cannot specify an Amazon Web Services KMS key to encrypt the storage volume used for automated data labeling model training and inference when you create a labeling job using the console. To learn more, see Output Data and Storage Volume Encryption. The VolumeKmsKeyId can be any of the following formats:   KMS Key ID  "1234abcd-12ab-34cd-56ef-1234567890ab"    Amazon Resource Name (ARN) of a KMS Key  "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab"
         public let volumeKmsKeyId: String?
+        public let vpcConfig: VpcConfig?
 
-        public init(volumeKmsKeyId: String? = nil) {
+        public init(volumeKmsKeyId: String? = nil, vpcConfig: VpcConfig? = nil) {
             self.volumeKmsKeyId = volumeKmsKeyId
+            self.vpcConfig = vpcConfig
         }
 
         public func validate(name: String) throws {
             try self.validate(self.volumeKmsKeyId, name: "volumeKmsKeyId", parent: name, max: 2048)
             try self.validate(self.volumeKmsKeyId, name: "volumeKmsKeyId", parent: name, pattern: ".*")
+            try self.vpcConfig?.validate(name: "\(name).vpcConfig")
         }
 
         private enum CodingKeys: String, CodingKey {
             case volumeKmsKeyId = "VolumeKmsKeyId"
+            case vpcConfig = "VpcConfig"
         }
     }
 
@@ -23589,7 +23607,7 @@ extension SageMaker {
     }
 
     public struct ResourceSpec: AWSEncodableShape & AWSDecodableShape {
-        /// The instance type that the image version runs on.  JupyterServer Apps only support the system value. KernelGateway Apps do not support the system value, but support all other values for available instance types.
+        /// The instance type that the image version runs on.   JupyterServer apps only support the system value. For KernelGateway apps, the system value is translated to ml.t3.medium. KernelGateway apps also support all other values for available instance types.
         public let instanceType: AppInstanceType?
         ///  The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.
         public let lifecycleConfigArn: String?
@@ -27210,11 +27228,14 @@ extension SageMaker {
         public let sourceIpConfig: SourceIpConfig?
         /// The name of the private workforce that you want to update. You can find your workforce name by using the  operation.
         public let workforceName: String
+        /// Use this parameter to update your VPC configuration for a workforce.
+        public let workforceVpcConfig: WorkforceVpcConfigRequest?
 
-        public init(oidcConfig: OidcConfig? = nil, sourceIpConfig: SourceIpConfig? = nil, workforceName: String) {
+        public init(oidcConfig: OidcConfig? = nil, sourceIpConfig: SourceIpConfig? = nil, workforceName: String, workforceVpcConfig: WorkforceVpcConfigRequest? = nil) {
             self.oidcConfig = oidcConfig
             self.sourceIpConfig = sourceIpConfig
             self.workforceName = workforceName
+            self.workforceVpcConfig = workforceVpcConfig
         }
 
         public func validate(name: String) throws {
@@ -27223,12 +27244,14 @@ extension SageMaker {
             try self.validate(self.workforceName, name: "workforceName", parent: name, max: 63)
             try self.validate(self.workforceName, name: "workforceName", parent: name, min: 1)
             try self.validate(self.workforceName, name: "workforceName", parent: name, pattern: "^[a-zA-Z0-9]([a-zA-Z0-9\\-]){0,62}$")
+            try self.workforceVpcConfig?.validate(name: "\(name).workforceVpcConfig")
         }
 
         private enum CodingKeys: String, CodingKey {
             case oidcConfig = "OidcConfig"
             case sourceIpConfig = "SourceIpConfig"
             case workforceName = "WorkforceName"
+            case workforceVpcConfig = "WorkforceVpcConfig"
         }
     }
 
@@ -27476,39 +27499,114 @@ extension SageMaker {
         public let cognitoConfig: CognitoConfig?
         /// The date that the workforce is created.
         public let createDate: Date?
+        /// The reason your workforce failed.
+        public let failureReason: String?
         /// The most recent date that  was used to successfully add one or more IP address ranges (CIDRs) to a private workforce's allow list.
         public let lastUpdatedDate: Date?
         /// The configuration of an OIDC Identity Provider (IdP) private workforce.
         public let oidcConfig: OidcConfigForResponse?
         /// A list of one to ten IP address ranges (CIDRs) to be added to the workforce allow list. By default, a workforce isn't restricted to specific IP addresses.
         public let sourceIpConfig: SourceIpConfig?
+        /// The status of your workforce.
+        public let status: WorkforceStatus?
         /// The subdomain for your OIDC Identity Provider.
         public let subDomain: String?
         /// The Amazon Resource Name (ARN) of the private workforce.
         public let workforceArn: String
         /// The name of the private workforce.
         public let workforceName: String
+        /// The configuration of a VPC workforce.
+        public let workforceVpcConfig: WorkforceVpcConfigResponse?
 
-        public init(cognitoConfig: CognitoConfig? = nil, createDate: Date? = nil, lastUpdatedDate: Date? = nil, oidcConfig: OidcConfigForResponse? = nil, sourceIpConfig: SourceIpConfig? = nil, subDomain: String? = nil, workforceArn: String, workforceName: String) {
+        public init(cognitoConfig: CognitoConfig? = nil, createDate: Date? = nil, failureReason: String? = nil, lastUpdatedDate: Date? = nil, oidcConfig: OidcConfigForResponse? = nil, sourceIpConfig: SourceIpConfig? = nil, status: WorkforceStatus? = nil, subDomain: String? = nil, workforceArn: String, workforceName: String, workforceVpcConfig: WorkforceVpcConfigResponse? = nil) {
             self.cognitoConfig = cognitoConfig
             self.createDate = createDate
+            self.failureReason = failureReason
             self.lastUpdatedDate = lastUpdatedDate
             self.oidcConfig = oidcConfig
             self.sourceIpConfig = sourceIpConfig
+            self.status = status
             self.subDomain = subDomain
             self.workforceArn = workforceArn
             self.workforceName = workforceName
+            self.workforceVpcConfig = workforceVpcConfig
         }
 
         private enum CodingKeys: String, CodingKey {
             case cognitoConfig = "CognitoConfig"
             case createDate = "CreateDate"
+            case failureReason = "FailureReason"
             case lastUpdatedDate = "LastUpdatedDate"
             case oidcConfig = "OidcConfig"
             case sourceIpConfig = "SourceIpConfig"
+            case status = "Status"
             case subDomain = "SubDomain"
             case workforceArn = "WorkforceArn"
             case workforceName = "WorkforceName"
+            case workforceVpcConfig = "WorkforceVpcConfig"
+        }
+    }
+
+    public struct WorkforceVpcConfigRequest: AWSEncodableShape {
+        /// The VPC security group IDs, in the form sg-xxxxxxxx. The security groups must be for the same VPC as specified in the subnet.
+        public let securityGroupIds: [String]?
+        /// The ID of the subnets in the VPC that you want to connect.
+        public let subnets: [String]?
+        /// The ID of the VPC that the workforce uses for communication.
+        public let vpcId: String?
+
+        public init(securityGroupIds: [String]? = nil, subnets: [String]? = nil, vpcId: String? = nil) {
+            self.securityGroupIds = securityGroupIds
+            self.subnets = subnets
+            self.vpcId = vpcId
+        }
+
+        public func validate(name: String) throws {
+            try self.securityGroupIds?.forEach {
+                try validate($0, name: "securityGroupIds[]", parent: name, max: 32)
+                try validate($0, name: "securityGroupIds[]", parent: name, pattern: "^sg-[0-9a-z]*$")
+            }
+            try self.validate(self.securityGroupIds, name: "securityGroupIds", parent: name, max: 5)
+            try self.validate(self.securityGroupIds, name: "securityGroupIds", parent: name, min: 1)
+            try self.subnets?.forEach {
+                try validate($0, name: "subnets[]", parent: name, max: 32)
+                try validate($0, name: "subnets[]", parent: name, pattern: "^subnet-[0-9a-z]*$")
+            }
+            try self.validate(self.subnets, name: "subnets", parent: name, max: 16)
+            try self.validate(self.subnets, name: "subnets", parent: name, min: 1)
+            try self.validate(self.vpcId, name: "vpcId", parent: name, max: 32)
+            try self.validate(self.vpcId, name: "vpcId", parent: name, pattern: "^vpc-[0-9a-z]*$")
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case securityGroupIds = "SecurityGroupIds"
+            case subnets = "Subnets"
+            case vpcId = "VpcId"
+        }
+    }
+
+    public struct WorkforceVpcConfigResponse: AWSDecodableShape {
+        /// The VPC security group IDs, in the form sg-xxxxxxxx. The security groups must be for the same VPC as specified in the subnet.
+        public let securityGroupIds: [String]
+        /// The ID of the subnets in the VPC that you want to connect.
+        public let subnets: [String]
+        /// The IDs for the VPC service endpoints of your VPC workforce when it is created and updated.
+        public let vpcEndpointId: String?
+        /// The ID of the VPC that the workforce uses for communication.
+        public let vpcId: String
+
+        public init(securityGroupIds: [String], subnets: [String], vpcEndpointId: String? = nil, vpcId: String) {
+            self.securityGroupIds = securityGroupIds
+            self.subnets = subnets
+            self.vpcEndpointId = vpcEndpointId
+            self.vpcId = vpcId
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case securityGroupIds = "SecurityGroupIds"
+            case subnets = "Subnets"
+            case vpcEndpointId = "VpcEndpointId"
+            case vpcId = "VpcId"
         }
     }
 

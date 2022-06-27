@@ -7595,7 +7595,9 @@ extension EC2 {
         public let deviceName: String?
         /// Checks whether you have the required permissions for the action, without actually making the request, and provides an error response. If you have the required permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
         public let dryRun: Bool?
-        /// The Internet-routable IP address for the customer gateway's outside interface. The address must be static.
+        ///  IPv4 address for the customer gateway device's outside interface. The address must be static.
+        public let ipAddress: String?
+        ///  This member has been deprecated. The Internet-routable IP address for the customer gateway's outside interface. The address must be static.
         public let publicIp: String?
         /// The tags to apply to the customer gateway.
         @OptionalCustomCoding<ArrayCoder<_TagSpecificationsEncoding, TagSpecification>>
@@ -7603,11 +7605,12 @@ extension EC2 {
         /// The type of VPN connection that this customer gateway supports (ipsec.1).
         public let type: GatewayType
 
-        public init(bgpAsn: Int, certificateArn: String? = nil, deviceName: String? = nil, dryRun: Bool? = nil, publicIp: String? = nil, tagSpecifications: [TagSpecification]? = nil, type: GatewayType) {
+        public init(bgpAsn: Int, certificateArn: String? = nil, deviceName: String? = nil, dryRun: Bool? = nil, ipAddress: String? = nil, publicIp: String? = nil, tagSpecifications: [TagSpecification]? = nil, type: GatewayType) {
             self.bgpAsn = bgpAsn
             self.certificateArn = certificateArn
             self.deviceName = deviceName
             self.dryRun = dryRun
+            self.ipAddress = ipAddress
             self.publicIp = publicIp
             self.tagSpecifications = tagSpecifications
             self.type = type
@@ -7618,7 +7621,8 @@ extension EC2 {
             case certificateArn = "CertificateArn"
             case deviceName = "DeviceName"
             case dryRun
-            case publicIp = "IpAddress"
+            case ipAddress = "IpAddress"
+            case publicIp = "PublicIp"
             case tagSpecifications = "TagSpecification"
             case type = "Type"
         }
@@ -11169,7 +11173,7 @@ extension EC2 {
         public let customerGatewayId: String?
         /// The name of customer gateway device.
         public let deviceName: String?
-        /// The Internet-routable IP address of the customer gateway's outside interface.
+        /// The IP address of the customer gateway device's outside interface.
         public let ipAddress: String?
         /// The current state of the customer gateway (pending | available | deleting | deleted).
         public let state: String?
@@ -14337,7 +14341,7 @@ extension EC2 {
         public var customerGatewayIds: [String]?
         /// Checks whether you have the required permissions for the action, without actually making the request, and provides an error response. If you have the required permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation.
         public let dryRun: Bool?
-        /// One or more filters.    bgp-asn - The customer gateway's Border Gateway Protocol (BGP) Autonomous System Number (ASN).    customer-gateway-id - The ID of the customer gateway.    ip-address - The IP address of the customer gateway's Internet-routable external interface.    state - The state of the customer gateway (pending | available | deleting | deleted).    type - The type of customer gateway. Currently, the only supported type is ipsec.1.    tag: - The key/value combination of a tag assigned to the resource. Use the tag key in the filter name and the tag value as the filter value. For example, to find all resources that have a tag with the key Owner and the value TeamA, specify tag:Owner for the filter name and TeamA for the filter value.     tag-key - The key of a tag assigned to the resource. Use this filter to find all resources assigned a tag with a specific key, regardless of the tag value.
+        /// One or more filters.    bgp-asn - The customer gateway's Border Gateway Protocol (BGP) Autonomous System Number (ASN).    customer-gateway-id - The ID of the customer gateway.    ip-address - The IP address of the customer gateway device's external interface.    state - The state of the customer gateway (pending | available | deleting | deleted).    type - The type of customer gateway. Currently, the only supported type is ipsec.1.    tag: - The key/value combination of a tag assigned to the resource. Use the tag key in the filter name and the tag value as the filter value. For example, to find all resources that have a tag with the key Owner and the value TeamA, specify tag:Owner for the filter name and TeamA for the filter value.     tag-key - The key of a tag assigned to the resource. Use this filter to find all resources assigned a tag with a specific key, regardless of the tag value.
         @OptionalCustomCoding<ArrayCoder<_FiltersEncoding, Filter>>
         public var filters: [Filter]?
 
@@ -46623,25 +46627,31 @@ extension EC2 {
         public let localIpv4NetworkCidr: String?
         /// The IPv6 CIDR on the customer gateway (on-premises) side of the VPN connection.
         public let localIpv6NetworkCidr: String?
+        /// The type of IPv4 address assigned to the outside interface of the customer gateway. Valid values: PrivateIpv4 | PublicIpv4  Default: PublicIpv4
+        public let outsideIpAddressType: String?
         /// The IPv4 CIDR on the Amazon Web Services side of the VPN connection.
         public let remoteIpv4NetworkCidr: String?
         /// The IPv6 CIDR on the Amazon Web Services side of the VPN connection.
         public let remoteIpv6NetworkCidr: String?
         /// Indicates whether the VPN connection uses static routes only. Static routes must be used for devices that don't support BGP.
         public let staticRoutesOnly: Bool?
+        /// The transit gateway attachment ID in use for the VPN tunnel.
+        public let transportTransitGatewayAttachmentId: String?
         /// Indicates whether the VPN tunnels process IPv4 or IPv6 traffic.
         public let tunnelInsideIpVersion: TunnelInsideIpVersion?
         /// Indicates the VPN tunnel options.
         @OptionalCustomCoding<ArrayCoder<_TunnelOptionsEncoding, TunnelOption>>
         public var tunnelOptions: [TunnelOption]?
 
-        public init(enableAcceleration: Bool? = nil, localIpv4NetworkCidr: String? = nil, localIpv6NetworkCidr: String? = nil, remoteIpv4NetworkCidr: String? = nil, remoteIpv6NetworkCidr: String? = nil, staticRoutesOnly: Bool? = nil, tunnelInsideIpVersion: TunnelInsideIpVersion? = nil, tunnelOptions: [TunnelOption]? = nil) {
+        public init(enableAcceleration: Bool? = nil, localIpv4NetworkCidr: String? = nil, localIpv6NetworkCidr: String? = nil, outsideIpAddressType: String? = nil, remoteIpv4NetworkCidr: String? = nil, remoteIpv6NetworkCidr: String? = nil, staticRoutesOnly: Bool? = nil, transportTransitGatewayAttachmentId: String? = nil, tunnelInsideIpVersion: TunnelInsideIpVersion? = nil, tunnelOptions: [TunnelOption]? = nil) {
             self.enableAcceleration = enableAcceleration
             self.localIpv4NetworkCidr = localIpv4NetworkCidr
             self.localIpv6NetworkCidr = localIpv6NetworkCidr
+            self.outsideIpAddressType = outsideIpAddressType
             self.remoteIpv4NetworkCidr = remoteIpv4NetworkCidr
             self.remoteIpv6NetworkCidr = remoteIpv6NetworkCidr
             self.staticRoutesOnly = staticRoutesOnly
+            self.transportTransitGatewayAttachmentId = transportTransitGatewayAttachmentId
             self.tunnelInsideIpVersion = tunnelInsideIpVersion
             self.tunnelOptions = tunnelOptions
         }
@@ -46650,9 +46660,11 @@ extension EC2 {
             case enableAcceleration
             case localIpv4NetworkCidr
             case localIpv6NetworkCidr
+            case outsideIpAddressType
             case remoteIpv4NetworkCidr
             case remoteIpv6NetworkCidr
             case staticRoutesOnly
+            case transportTransitGatewayAttachmentId
             case tunnelInsideIpVersion
             case tunnelOptions = "tunnelOptionSet"
         }
@@ -46665,25 +46677,31 @@ extension EC2 {
         public let localIpv4NetworkCidr: String?
         /// The IPv6 CIDR on the customer gateway (on-premises) side of the VPN connection. Default: ::/0
         public let localIpv6NetworkCidr: String?
+        /// The type of IPv4 address assigned to the outside interface of the customer gateway device. Valid values: PrivateIpv4 | PublicIpv4  Default: PublicIpv4
+        public let outsideIpAddressType: String?
         /// The IPv4 CIDR on the Amazon Web Services side of the VPN connection. Default: 0.0.0.0/0
         public let remoteIpv4NetworkCidr: String?
         /// The IPv6 CIDR on the Amazon Web Services side of the VPN connection. Default: ::/0
         public let remoteIpv6NetworkCidr: String?
         /// Indicate whether the VPN connection uses static routes only. If you are creating a VPN connection for a device that does not support BGP, you must specify true. Use CreateVpnConnectionRoute to create a static route. Default: false
         public let staticRoutesOnly: Bool?
+        /// The transit gateway attachment ID to use for the VPN tunnel. Required if OutsideIpAddressType is set to PrivateIpv4.
+        public let transportTransitGatewayAttachmentId: String?
         /// Indicate whether the VPN tunnels process IPv4 or IPv6 traffic. Default: ipv4
         public let tunnelInsideIpVersion: TunnelInsideIpVersion?
         /// The tunnel options for the VPN connection.
         @OptionalCustomCoding<StandardArrayCoder>
         public var tunnelOptions: [VpnTunnelOptionsSpecification]?
 
-        public init(enableAcceleration: Bool? = nil, localIpv4NetworkCidr: String? = nil, localIpv6NetworkCidr: String? = nil, remoteIpv4NetworkCidr: String? = nil, remoteIpv6NetworkCidr: String? = nil, staticRoutesOnly: Bool? = nil, tunnelInsideIpVersion: TunnelInsideIpVersion? = nil, tunnelOptions: [VpnTunnelOptionsSpecification]? = nil) {
+        public init(enableAcceleration: Bool? = nil, localIpv4NetworkCidr: String? = nil, localIpv6NetworkCidr: String? = nil, outsideIpAddressType: String? = nil, remoteIpv4NetworkCidr: String? = nil, remoteIpv6NetworkCidr: String? = nil, staticRoutesOnly: Bool? = nil, transportTransitGatewayAttachmentId: String? = nil, tunnelInsideIpVersion: TunnelInsideIpVersion? = nil, tunnelOptions: [VpnTunnelOptionsSpecification]? = nil) {
             self.enableAcceleration = enableAcceleration
             self.localIpv4NetworkCidr = localIpv4NetworkCidr
             self.localIpv6NetworkCidr = localIpv6NetworkCidr
+            self.outsideIpAddressType = outsideIpAddressType
             self.remoteIpv4NetworkCidr = remoteIpv4NetworkCidr
             self.remoteIpv6NetworkCidr = remoteIpv6NetworkCidr
             self.staticRoutesOnly = staticRoutesOnly
+            self.transportTransitGatewayAttachmentId = transportTransitGatewayAttachmentId
             self.tunnelInsideIpVersion = tunnelInsideIpVersion
             self.tunnelOptions = tunnelOptions
         }
@@ -46692,9 +46710,11 @@ extension EC2 {
             case enableAcceleration = "EnableAcceleration"
             case localIpv4NetworkCidr = "LocalIpv4NetworkCidr"
             case localIpv6NetworkCidr = "LocalIpv6NetworkCidr"
+            case outsideIpAddressType = "OutsideIpAddressType"
             case remoteIpv4NetworkCidr = "RemoteIpv4NetworkCidr"
             case remoteIpv6NetworkCidr = "RemoteIpv6NetworkCidr"
             case staticRoutesOnly
+            case transportTransitGatewayAttachmentId = "TransportTransitGatewayAttachmentId"
             case tunnelInsideIpVersion = "TunnelInsideIpVersion"
             case tunnelOptions = "TunnelOptions"
         }

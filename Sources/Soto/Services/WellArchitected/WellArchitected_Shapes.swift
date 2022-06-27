@@ -21,6 +21,12 @@ import SotoCore
 extension WellArchitected {
     // MARK: Enums
 
+    public enum AdditionalResourceType: String, CustomStringConvertible, Codable, _SotoSendable {
+        case helpfulResource = "HELPFUL_RESOURCE"
+        case improvementPlan = "IMPROVEMENT_PLAN"
+        public var description: String { return self.rawValue }
+    }
+
     public enum AnswerReason: String, CustomStringConvertible, Codable, _SotoSendable {
         case architectureConstraints = "ARCHITECTURE_CONSTRAINTS"
         case businessPriorities = "BUSINESS_PRIORITIES"
@@ -142,6 +148,23 @@ extension WellArchitected {
 
     // MARK: Shapes
 
+    public struct AdditionalResources: AWSDecodableShape {
+        /// The URLs for additional resources, either helpful resources or improvement plans. Up to five additional URLs can be specified.
+        public let content: [ChoiceContent]?
+        /// Type of additional resource.
+        public let type: AdditionalResourceType?
+
+        public init(content: [ChoiceContent]? = nil, type: AdditionalResourceType? = nil) {
+            self.content = content
+            self.type = type
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case content = "Content"
+            case type = "Type"
+        }
+    }
+
     public struct Answer: AWSDecodableShape {
         /// A list of selected choices to a question in your workload.
         public let choiceAnswers: [ChoiceAnswer]?
@@ -262,6 +285,8 @@ extension WellArchitected {
     }
 
     public struct Choice: AWSDecodableShape {
+        /// The additional resources for a choice. A choice can have up to two additional resources: one of type HELPFUL_RESOURCE,  one of type IMPROVEMENT_PLAN, or both.
+        public let additionalResources: [AdditionalResources]?
         public let choiceId: String?
         public let description: String?
         /// The choice level helpful resource.
@@ -270,7 +295,8 @@ extension WellArchitected {
         public let improvementPlan: ChoiceContent?
         public let title: String?
 
-        public init(choiceId: String? = nil, description: String? = nil, helpfulResource: ChoiceContent? = nil, improvementPlan: ChoiceContent? = nil, title: String? = nil) {
+        public init(additionalResources: [AdditionalResources]? = nil, choiceId: String? = nil, description: String? = nil, helpfulResource: ChoiceContent? = nil, improvementPlan: ChoiceContent? = nil, title: String? = nil) {
+            self.additionalResources = additionalResources
             self.choiceId = choiceId
             self.description = description
             self.helpfulResource = helpfulResource
@@ -279,6 +305,7 @@ extension WellArchitected {
         }
 
         private enum CodingKeys: String, CodingKey {
+            case additionalResources = "AdditionalResources"
             case choiceId = "ChoiceId"
             case description = "Description"
             case helpfulResource = "HelpfulResource"
@@ -537,12 +564,12 @@ extension WellArchitected {
         public let nonAwsRegions: [String]?
         public let notes: String?
         public let pillarPriorities: [String]?
-        public let reviewOwner: String
+        public let reviewOwner: String?
         /// The tags to be associated with the workload.
         public let tags: [String: String]?
         public let workloadName: String
 
-        public init(accountIds: [String]? = nil, architecturalDesign: String? = nil, awsRegions: [String]? = nil, clientRequestToken: String = CreateWorkloadInput.idempotencyToken(), description: String, environment: WorkloadEnvironment, industry: String? = nil, industryType: String? = nil, lenses: [String], nonAwsRegions: [String]? = nil, notes: String? = nil, pillarPriorities: [String]? = nil, reviewOwner: String, tags: [String: String]? = nil, workloadName: String) {
+        public init(accountIds: [String]? = nil, architecturalDesign: String? = nil, awsRegions: [String]? = nil, clientRequestToken: String = CreateWorkloadInput.idempotencyToken(), description: String, environment: WorkloadEnvironment, industry: String? = nil, industryType: String? = nil, lenses: [String], nonAwsRegions: [String]? = nil, notes: String? = nil, pillarPriorities: [String]? = nil, reviewOwner: String? = nil, tags: [String: String]? = nil, workloadName: String) {
             self.accountIds = accountIds
             self.architecturalDesign = architecturalDesign
             self.awsRegions = awsRegions
@@ -1254,14 +1281,17 @@ extension WellArchitected {
         public let owner: String?
         /// The ID assigned to the share invitation.
         public let shareInvitationId: String?
+        /// The tags assigned to the lens.
+        public let tags: [String: String]?
 
-        public init(description: String? = nil, lensArn: String? = nil, lensVersion: String? = nil, name: String? = nil, owner: String? = nil, shareInvitationId: String? = nil) {
+        public init(description: String? = nil, lensArn: String? = nil, lensVersion: String? = nil, name: String? = nil, owner: String? = nil, shareInvitationId: String? = nil, tags: [String: String]? = nil) {
             self.description = description
             self.lensArn = lensArn
             self.lensVersion = lensVersion
             self.name = name
             self.owner = owner
             self.shareInvitationId = shareInvitationId
+            self.tags = tags
         }
 
         private enum CodingKeys: String, CodingKey {
@@ -1271,6 +1301,7 @@ extension WellArchitected {
             case name = "Name"
             case owner = "Owner"
             case shareInvitationId = "ShareInvitationId"
+            case tags = "Tags"
         }
     }
 

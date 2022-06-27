@@ -39,6 +39,25 @@ extension ECS {
         return self.client.waitUntil(input, waiter: waiter, maxWaitTime: maxWaitTime, logger: logger, on: eventLoop)
     }
 
+    public func waitUntilServicesStable(
+        _ input: DescribeServicesRequest,
+        maxWaitTime: TimeAmount? = nil,
+        logger: Logger = AWSClient.loggingDisabled,
+        on eventLoop: EventLoop? = nil
+    ) -> EventLoopFuture<Void> {
+        let waiter = AWSClient.Waiter(
+            acceptors: [
+                .init(state: .failure, matcher: try! JMESAnyPathMatcher("failures[].reason", expected: "MISSING")),
+                .init(state: .failure, matcher: try! JMESAnyPathMatcher("services[].status", expected: "DRAINING")),
+                .init(state: .failure, matcher: try! JMESAnyPathMatcher("services[].status", expected: "INACTIVE")),
+                .init(state: .success, matcher: try! JMESPathMatcher("length(services[?!(length(deployments) == `1` && runningCount == desiredCount)]) == `0`", expected: "true")),
+            ],
+            minDelayTime: .seconds(15),
+            command: describeServices
+        )
+        return self.client.waitUntil(input, waiter: waiter, maxWaitTime: maxWaitTime, logger: logger, on: eventLoop)
+    }
+
     public func waitUntilTasksRunning(
         _ input: DescribeTasksRequest,
         maxWaitTime: TimeAmount? = nil,

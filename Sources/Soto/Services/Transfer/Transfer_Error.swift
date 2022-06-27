@@ -66,7 +66,6 @@ public struct TransferErrorType: AWSErrorType {
     /// The request has failed because the Amazon Web ServicesTransfer Family service is not available.
     public static var serviceUnavailableException: Self { .init(.serviceUnavailableException) }
     /// The request was denied due to request throttling.
-    ///  HTTP Status Code: 400
     public static var throttlingException: Self { .init(.throttlingException) }
 }
 

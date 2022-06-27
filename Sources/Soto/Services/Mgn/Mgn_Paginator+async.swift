@@ -67,6 +67,28 @@ extension Mgn {
         )
     }
 
+    ///  Creates a new ReplicationConfigurationTemplate.
+    /// Return PaginatorSequence for operation.
+    ///
+    /// - Parameters:
+    ///   - input: Input for request
+    ///   - logger: Logger used flot logging
+    ///   - eventLoop: EventLoop to run this process on
+    public func describeLaunchConfigurationTemplatesPaginator(
+        _ input: DescribeLaunchConfigurationTemplatesRequest,
+        logger: Logger = AWSClient.loggingDisabled,
+        on eventLoop: EventLoop? = nil
+    ) -> AWSClient.PaginatorSequence<DescribeLaunchConfigurationTemplatesRequest, DescribeLaunchConfigurationTemplatesResponse> {
+        return .init(
+            input: input,
+            command: describeLaunchConfigurationTemplates,
+            inputKey: \DescribeLaunchConfigurationTemplatesRequest.nextToken,
+            outputKey: \DescribeLaunchConfigurationTemplatesResponse.nextToken,
+            logger: logger,
+            on: eventLoop
+        )
+    }
+
     ///  Lists all ReplicationConfigurationTemplates, filtered by Source Server IDs.
     /// Return PaginatorSequence for operation.
     ///

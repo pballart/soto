@@ -36,6 +36,7 @@ public struct DirectoryServiceErrorType: AWSErrorType {
         case domainControllerLimitExceededException = "DomainControllerLimitExceededException"
         case entityAlreadyExistsException = "EntityAlreadyExistsException"
         case entityDoesNotExistException = "EntityDoesNotExistException"
+        case incompatibleSettingsException = "IncompatibleSettingsException"
         case insufficientPermissionsException = "InsufficientPermissionsException"
         case invalidCertificateException = "InvalidCertificateException"
         case invalidClientAuthStatusException = "InvalidClientAuthStatusException"
@@ -53,6 +54,7 @@ public struct DirectoryServiceErrorType: AWSErrorType {
         case snapshotLimitExceededException = "SnapshotLimitExceededException"
         case tagLimitExceededException = "TagLimitExceededException"
         case unsupportedOperationException = "UnsupportedOperationException"
+        case unsupportedSettingsException = "UnsupportedSettingsException"
         case userDoesNotExistException = "UserDoesNotExistException"
     }
 
@@ -106,6 +108,8 @@ public struct DirectoryServiceErrorType: AWSErrorType {
     public static var entityAlreadyExistsException: Self { .init(.entityAlreadyExistsException) }
     /// The specified entity could not be found.
     public static var entityDoesNotExistException: Self { .init(.entityDoesNotExistException) }
+    /// The specified directory setting is not compatible with other settings.
+    public static var incompatibleSettingsException: Self { .init(.incompatibleSettingsException) }
     /// The account does not have sufficient permission to perform the operation.
     public static var insufficientPermissionsException: Self { .init(.insufficientPermissionsException) }
     /// The certificate PEM that was provided has incorrect encoding.
@@ -140,6 +144,8 @@ public struct DirectoryServiceErrorType: AWSErrorType {
     public static var tagLimitExceededException: Self { .init(.tagLimitExceededException) }
     /// The operation is not supported.
     public static var unsupportedOperationException: Self { .init(.unsupportedOperationException) }
+    /// The specified directory setting is not supported.
+    public static var unsupportedSettingsException: Self { .init(.unsupportedSettingsException) }
     /// The user provided a username that does not exist in your directory.
     public static var userDoesNotExistException: Self { .init(.userDoesNotExistException) }
 }

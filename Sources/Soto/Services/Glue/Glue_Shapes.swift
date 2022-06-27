@@ -169,6 +169,14 @@ extension Glue {
         public var description: String { return self.rawValue }
     }
 
+    public enum CrawlerHistoryState: String, CustomStringConvertible, Codable, _SotoSendable {
+        case completed = "COMPLETED"
+        case failed = "FAILED"
+        case running = "RUNNING"
+        case stopped = "STOPPED"
+        public var description: String { return self.rawValue }
+    }
+
     public enum CrawlerLineageSettings: String, CustomStringConvertible, Codable, _SotoSendable {
         case disable = "DISABLE"
         case enable = "ENABLE"
@@ -216,6 +224,15 @@ extension Glue {
         public var description: String { return self.rawValue }
     }
 
+    public enum FieldName: String, CustomStringConvertible, Codable, _SotoSendable {
+        case crawlId = "CRAWL_ID"
+        case dpuHour = "DPU_HOUR"
+        case endTime = "END_TIME"
+        case startTime = "START_TIME"
+        case state = "STATE"
+        public var description: String { return self.rawValue }
+    }
+
     public enum FilterLogicalOperator: String, CustomStringConvertible, Codable, _SotoSendable {
         case and = "AND"
         case or = "OR"
@@ -230,6 +247,16 @@ extension Glue {
         case lt = "LT"
         case lte = "LTE"
         case regex = "REGEX"
+        public var description: String { return self.rawValue }
+    }
+
+    public enum FilterOperator: String, CustomStringConvertible, Codable, _SotoSendable {
+        case eq = "EQ"
+        case ge = "GE"
+        case gt = "GT"
+        case le = "LE"
+        case lt = "LT"
+        case ne = "NE"
         public var description: String { return self.rawValue }
     }
 
@@ -3040,7 +3067,7 @@ extension Glue {
         public let databaseName: String?
         /// A description of the crawler.
         public let description: String?
-        /// Specifies whether the crawler should use AWS Lake Formation credentials for the crawler instead of the IAM role credentials.
+        /// Specifies whether the crawler should use Lake Formation credentials for the crawler instead of the IAM role credentials.
         public let lakeFormationConfiguration: LakeFormationConfiguration?
         /// The status of the last crawl, and potentially error information if an error occurred.
         public let lastCrawl: LastCrawlInfo?
@@ -3111,6 +3138,55 @@ extension Glue {
             case tablePrefix = "TablePrefix"
             case targets = "Targets"
             case version = "Version"
+        }
+    }
+
+    public struct CrawlerHistory: AWSDecodableShape {
+        /// A UUID identifier for each crawl.
+        public let crawlId: String?
+        /// The number of data processing units (DPU) used in hours for the crawl.
+        public let dpuHour: Double?
+        /// The date and time on which the crawl ended.
+        public let endTime: Date?
+        /// If an error occurred, the error message associated with the crawl.
+        public let errorMessage: String?
+        /// The log group associated with the crawl.
+        public let logGroup: String?
+        /// The log stream associated with the crawl.
+        public let logStream: String?
+        /// The prefix for a CloudWatch message about this crawl.
+        public let messagePrefix: String?
+        /// The date and time on which the crawl started.
+        public let startTime: Date?
+        /// The state of the crawl.
+        public let state: CrawlerHistoryState?
+        /// A run summary for the specific crawl in JSON. Contains the catalog tables and partitions that were added, updated, or deleted.
+        public let summary: String?
+
+        public init(crawlId: String? = nil, dpuHour: Double? = nil, endTime: Date? = nil, errorMessage: String? = nil, logGroup: String? = nil, logStream: String? = nil, messagePrefix: String? = nil, startTime: Date? = nil, state: CrawlerHistoryState? = nil, summary: String? = nil) {
+            self.crawlId = crawlId
+            self.dpuHour = dpuHour
+            self.endTime = endTime
+            self.errorMessage = errorMessage
+            self.logGroup = logGroup
+            self.logStream = logStream
+            self.messagePrefix = messagePrefix
+            self.startTime = startTime
+            self.state = state
+            self.summary = summary
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case crawlId = "CrawlId"
+            case dpuHour = "DPUHour"
+            case endTime = "EndTime"
+            case errorMessage = "ErrorMessage"
+            case logGroup = "LogGroup"
+            case logStream = "LogStream"
+            case messagePrefix = "MessagePrefix"
+            case startTime = "StartTime"
+            case state = "State"
+            case summary = "Summary"
         }
     }
 
@@ -3204,6 +3280,29 @@ extension Glue {
             case jdbcTargets = "JdbcTargets"
             case mongoDBTargets = "MongoDBTargets"
             case s3Targets = "S3Targets"
+        }
+    }
+
+    public struct CrawlsFilter: AWSEncodableShape {
+        /// A key used to filter the crawler runs for a specified crawler. Valid values for each of the field names are:
+        /// 	           CRAWL_ID: A string representing the UUID identifier for a crawl.    STATE: A string representing the state of the crawl.    START_TIME and END_TIME: The epoch timestamp in milliseconds.    DPU_HOUR: The number of data processing unit (DPU) hours used for the crawl.
+        public let fieldName: FieldName?
+        /// The value provided for comparison on the crawl field.
+        public let fieldValue: String?
+        /// A defined comparator that operates on the value. The available operators are:
+        /// 	           GT: Greater than.    GE: Greater than or equal to.    LT: Less than.    LE: Less than or equal to.    EQ: Equal to.    NE: Not equal to.
+        public let filterOperator: FilterOperator?
+
+        public init(fieldName: FieldName? = nil, fieldValue: String? = nil, filterOperator: FilterOperator? = nil) {
+            self.fieldName = fieldName
+            self.fieldValue = fieldValue
+            self.filterOperator = filterOperator
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case fieldName = "FieldName"
+            case fieldValue = "FieldValue"
+            case filterOperator = "FilterOperator"
         }
     }
 
@@ -3347,6 +3446,7 @@ extension Glue {
         public let databaseName: String?
         /// A description of the new crawler.
         public let description: String?
+        /// Specifies Lake Formation configuration settings for the crawler.
         public let lakeFormationConfiguration: LakeFormationConfiguration?
         /// Specifies data lineage configuration settings for the crawler.
         public let lineageConfiguration: LineageConfiguration?
@@ -11072,7 +11172,7 @@ extension Glue {
     public struct LakeFormationConfiguration: AWSEncodableShape & AWSDecodableShape {
         /// Required for cross account crawls. For same account crawls as the target data, this can be left as null.
         public let accountId: String?
-        /// Specifies whether to use AWS Lake Formation credentials for the crawler instead of the IAM role credentials.
+        /// Specifies whether to use Lake Formation credentials for the crawler instead of the IAM role credentials.
         public let useLakeFormationCredentials: Bool?
 
         public init(accountId: String? = nil, useLakeFormationCredentials: Bool? = nil) {
@@ -11261,6 +11361,56 @@ extension Glue {
 
         private enum CodingKeys: String, CodingKey {
             case crawlerNames = "CrawlerNames"
+            case nextToken = "NextToken"
+        }
+    }
+
+    public struct ListCrawlsRequest: AWSEncodableShape {
+        /// The name of the crawler whose runs you want to retrieve.
+        public let crawlerName: String
+        /// Filters the crawls by the criteria you specify in a list of CrawlsFilter objects.
+        public let filters: [CrawlsFilter]?
+        /// The maximum number of results to return. The default is 20, and maximum is 100.
+        public let maxResults: Int?
+        /// A continuation token, if this is a continuation call.
+        public let nextToken: String?
+
+        public init(crawlerName: String, filters: [CrawlsFilter]? = nil, maxResults: Int? = nil, nextToken: String? = nil) {
+            self.crawlerName = crawlerName
+            self.filters = filters
+            self.maxResults = maxResults
+            self.nextToken = nextToken
+        }
+
+        public func validate(name: String) throws {
+            try self.validate(self.crawlerName, name: "crawlerName", parent: name, max: 255)
+            try self.validate(self.crawlerName, name: "crawlerName", parent: name, min: 1)
+            try self.validate(self.crawlerName, name: "crawlerName", parent: name, pattern: "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$")
+            try self.validate(self.maxResults, name: "maxResults", parent: name, max: 1000)
+            try self.validate(self.maxResults, name: "maxResults", parent: name, min: 1)
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case crawlerName = "CrawlerName"
+            case filters = "Filters"
+            case maxResults = "MaxResults"
+            case nextToken = "NextToken"
+        }
+    }
+
+    public struct ListCrawlsResponse: AWSDecodableShape {
+        /// A list of CrawlerHistory objects representing the crawl runs that meet your criteria.
+        public let crawls: [CrawlerHistory]?
+        /// A continuation token for paginating the returned list of tokens, returned if the current segment of the list is not the last.
+        public let nextToken: String?
+
+        public init(crawls: [CrawlerHistory]? = nil, nextToken: String? = nil) {
+            self.crawls = crawls
+            self.nextToken = nextToken
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case crawls = "Crawls"
             case nextToken = "NextToken"
         }
     }
@@ -16796,6 +16946,7 @@ extension Glue {
         public let databaseName: String?
         /// A description of the new crawler.
         public let description: String?
+        /// Specifies Lake Formation configuration settings for the crawler.
         public let lakeFormationConfiguration: LakeFormationConfiguration?
         /// Specifies data lineage configuration settings for the crawler.
         public let lineageConfiguration: LineageConfiguration?

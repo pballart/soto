@@ -272,6 +272,8 @@ extension Outposts {
     public struct AssetInfo: AWSDecodableShape {
         ///  The ID of the asset.
         public let assetId: String?
+        ///  The position of an asset in a rack.
+        public let assetLocation: AssetLocation?
         ///  The type of the asset.
         public let assetType: AssetType?
         ///  Information about compute hardware assets.
@@ -279,8 +281,9 @@ extension Outposts {
         ///  The rack ID of the asset.
         public let rackId: String?
 
-        public init(assetId: String? = nil, assetType: AssetType? = nil, computeAttributes: ComputeAttributes? = nil, rackId: String? = nil) {
+        public init(assetId: String? = nil, assetLocation: AssetLocation? = nil, assetType: AssetType? = nil, computeAttributes: ComputeAttributes? = nil, rackId: String? = nil) {
             self.assetId = assetId
+            self.assetLocation = assetLocation
             self.assetType = assetType
             self.computeAttributes = computeAttributes
             self.rackId = rackId
@@ -288,9 +291,23 @@ extension Outposts {
 
         private enum CodingKeys: String, CodingKey {
             case assetId = "AssetId"
+            case assetLocation = "AssetLocation"
             case assetType = "AssetType"
             case computeAttributes = "ComputeAttributes"
             case rackId = "RackId"
+        }
+    }
+
+    public struct AssetLocation: AWSDecodableShape {
+        ///  The position of an asset in a rack measured in rack units.
+        public let rackElevation: Float?
+
+        public init(rackElevation: Float? = nil) {
+            self.rackElevation = rackElevation
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case rackElevation = "RackElevation"
         }
     }
 
